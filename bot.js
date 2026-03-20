@@ -33,7 +33,7 @@ async function askAI(model, text) {
   aiBusy = true;
 
   try {
-    await sleep(12000); // anti rate limit (5 request / menit)
+    await sleep(2000); // anti rate limit (5 request / menit)
     const result = await model.generateContent(text);
     return result.response.text();
   } catch (err) {
@@ -86,9 +86,10 @@ async function startBot() {
     }
   });
 
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-  });
+  // Ganti ke model stable agar kuota lebih besar (15 RPM)
+const model = genAI.getGenerativeModel({
+  model: "gemini-3.1-flash-lite-preview", 
+});
 
   sock.ev.on("messages.upsert", async ({ messages }) => {
     try {
@@ -103,6 +104,7 @@ async function startBot() {
 
       // hanya tangani chat pribadi, bukan grup
       if (from.endsWith("@g.us")) return;
+if(from.endsWith("@newsletter")) return;
       if (from === "status@broadcast") return;
 
       // cek command /on dan /off
@@ -139,9 +141,9 @@ async function startBot() {
       await sock.sendPresenceUpdate("composing", from);
 
       const prompt = `
-Kamu adalah asisten AI yang sangat membantu.
+Kamu adalah remaja keren umur 25 tahun  yang baik.
 
-Jawablah semua pesan **dalam bahasa Indonesia** dengan sopan dan jelas.
+Jawablah semua pesan **dalam bahasa Indonesia** dengan frendly dan sopan.
 
 Pesan pengguna :
 ${text}
@@ -153,7 +155,7 @@ ${text}
         // hanya kirim pesan error 1 kali
         if (!errorNotified) {
           await sock.sendMessage(from, {
-            text: "⚠️ Maaf, AI sedang mengalami gangguan.",
+            text: "⚠️ Maaf, saya lagi sibuk banget chat nanti lagi ya.",
           });
           errorNotified = true;
         }
